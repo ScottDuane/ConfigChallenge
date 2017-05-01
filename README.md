@@ -16,4 +16,9 @@ This solution takes advantage of Ruby's unique metaprogramming capabilities.
 
 ## Tests
 
-## Unimplemented Features 
+## Unimplemented Features & Other Todos
+
+There are a few loose ends that I didn't have time to shore up. With more time I would:
+
+- Test `is_well_formed?` and `parse_file` in `entry.rb`. That'd require wrapping that up in a class, or incorporating the error handling into the `ConfigObject` class itself, as well as writing the tests themselves.  
+- Overwrite `to_ary` in `ConfigHash` so that `puts` works properly.  Right now all the querying functionality of the `Hash` class persists onto `ConfigHash`, but `to_ary` is not working. 

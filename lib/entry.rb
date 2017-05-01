@@ -18,9 +18,8 @@ end
 
 def is_well_formed?(lines)
   lines.each do |line|
-    puts "in is_well_formed #{line}"
     while line[0] == " "
-      line.shift
+      line = line[1..-1]
     end
   end
 
@@ -48,3 +47,4 @@ end
 # Test cases
 config = load_config('./test_files/test_file_1.conf')
 config.ftp
+config.ftp.name

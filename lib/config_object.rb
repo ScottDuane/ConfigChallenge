@@ -1,13 +1,11 @@
+require_relative 'config_hash'
+
 class ConfigObject
   def initialize(filepath, overrides=[])
     @filepath = filepath
     @overrides = overrides
     @query_hash = {}
     create_hash
-    # read in the file
-    # create the giant hash
-    # write method_missing to take in method name and return a query to the hash
-    # unresolved: how to deal with overrides that are passed in with initialization
   end
 
   def create_hash
@@ -45,7 +43,6 @@ class ConfigObject
           val = parsed_line[2]
           @query_hash[curr_group][setting] = {}
           @query_hash[curr_group][setting][""] = val
-
         when "setting_val_override" then
           setting = parsed_line[1]
           override = parsed_line[2]
@@ -98,14 +95,23 @@ class ConfigObject
   end
 
   def method_missing(method_name, args=[])
-    # calls = method_name.split(".")
-    # split the method_name over . to determine how deep in the hash to go
-    # perform recursive calls until only one method is being called
+    # this will create a new ConfigHash from the existing @query_hash and the args passed in
+    data = @query_hash[method_name.to_s]
+    nested_hash = Hash.new
 
-    # for now, test by printing method_name
-    puts "my method name is #{method_name}"
-    puts "my args are #{args}"
-    puts method_name == :ftp
-    puts @query_hash[method_name.to_s]
+    # downside: time complexity.  can we build any of this as we go?  what depends on the method call/args itself?
+    data.each do |key, val|
+      key = key.to_sym
+      nested_hash[key] = val[""]
+
+      args.each do |override|
+        if data[key][override]
+          nested_hash[key] = val[override]
+        end
+      end
+    end
+
+    nested_hash
   end
+
 end
