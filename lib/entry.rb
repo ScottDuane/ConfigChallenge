@@ -1,7 +1,8 @@
-require './config_object.rb'
+require_relative 'config_object.rb'
+require 'pathname'
 
 def parse_file(filename)
-  if File.exist?(filename) && File.readable?(filename)
+  if Pathname.new(filename).expand_path.file?
     lines = []
     File.open(filename, 'r') do |file|
       while line = file.gets
@@ -17,13 +18,15 @@ end
 
 def is_well_formed?(lines)
   lines.each do |line|
-    while line.first == " "
+    puts line
+    while line[0] == " "
       line.shift
     end
   end
 
   true
 end
+# note: use File.foreach instead of File.read for speed purposes
 
 # Error handling:
 # 1) Test to make sure the filename is an actual file
@@ -43,4 +46,4 @@ def load_config(filename, overrides=[])
 end
 
 # Test cases
-config = load_config('../test_files/test_file_1.conf')
+config = load_config('./test_files/test_file_1.conf')

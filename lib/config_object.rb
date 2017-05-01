@@ -84,6 +84,7 @@ class ConfigObject
         override = setting_with_overrides[1]
         override.pop
         return ["setting_val_override", setting, override, val]
+      end 
     end
   end
 
@@ -92,7 +93,7 @@ class ConfigObject
     # split the method_name over . to determine how deep in the hash to go
     # perform recursive calls until only one method is being called
 
-    # for now, test by printing method_name 
+    # for now, test by printing method_name
     puts method_name
   end
 end
