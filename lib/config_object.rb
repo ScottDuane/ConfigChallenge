@@ -14,7 +14,7 @@ class ConfigObject
     lines = []
     File.open(@filepath, 'r') do |file|
       while new_line = file.gets
-        lines << new_line
+        lines << new_line[0..-2]
       end
     end
 
@@ -22,13 +22,18 @@ class ConfigObject
   end
 
   def parse_text(lines)
+    curr_group = ""
     lines.each do |line|
+      next if line.length == 0
       # note: this makes the assumption that nothing kooky happens if there are two or more ; in a line
+      # note to self: this is pretty messy.  refactor before turning in
       line_without_comments = line.split(";").first
-
-      while line_without_comments[0] == " "
-        line_without_comments.shift
+      line_chars = line_without_comments.chars
+      while line_chars[0] == " " || line_chars[0] == "\n"
+        line_chars.shift
       end
+      line_without_comments = line_chars.reduce(:+)
+      next if line_without_comments.nil?
 
       parsed_line = parse_line(line_without_comments)
       case parsed_line[0]
@@ -67,24 +72,28 @@ class ConfigObject
       setting = setting_value_pair[0]
       value = setting_value_pair[1]
 
-      while setting.last == " "
-        setting.pop
+      setting_chars = setting.chars
+      while setting_chars.last == " "
+        setting_chars.pop
       end
+      setting = setting_chars.reduce(:+)
 
-      while value.first == " "
-        key.shift
+      value_chars = value.chars
+      while value_chars.first == " "
+        value_chars.shift
       end
+      value = value_chars.reduce(:+)
 
       # error check to make sure that this parses correctly beforehand -- e.g., has a < and a >
       setting_with_overrides = setting.split("<")
       if setting_with_overrides.length == 1
-        return ["setting_val", setting, val]
+        return ["setting_val", setting, value]
       else
         setting = setting_with_overrides[0]
         override = setting_with_overrides[1]
-        override.pop
-        return ["setting_val_override", setting, override, val]
-      end 
+        override = override[0..-2]
+        return ["setting_val_override", setting, override, value]
+      end
     end
   end
 
@@ -94,6 +103,9 @@ class ConfigObject
     # perform recursive calls until only one method is being called
 
     # for now, test by printing method_name
-    puts method_name
+    puts "my method name is #{method_name}"
+    puts "my args are #{args}"
+    puts method_name == :ftp
+    puts @query_hash[method_name.to_s]
   end
 end
