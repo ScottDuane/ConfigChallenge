@@ -46,7 +46,6 @@ class ConfigObject
     end
   end
 
-  # takes in a line after white space has been ignored
   def parse_line(line)
     if line.length == 0
       return nil
@@ -57,7 +56,6 @@ class ConfigObject
       setting_value_pair = line.split("=")
       setting = remove_whitespace(setting_value_pair[0])
       value = eval_with_type(remove_whitespace(setting_value_pair[1]))
-      # error check to make sure that this parses correctly beforehand -- e.g., has a < and a >
       setting_with_overrides = setting.split("<")
       if setting_with_overrides.length == 1
         return ["setting_val", setting, value]
@@ -67,10 +65,6 @@ class ConfigObject
         return ["setting_val_override", setting, override, value]
       end
     end
-  end
-
-  def method_missing(method_name, args=[])
-    @query_hash[method_name]
   end
 
   def eval_with_type(input)
@@ -83,7 +77,7 @@ class ConfigObject
     eval_as_string(input)
   end
 
-  # do this with regex? 
+  # do this with regex? nah, still gotta do the period_count
   def eval_as_num(input)
     period_count = 0
     digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]
@@ -124,5 +118,9 @@ class ConfigObject
     end
 
     line_chars.reduce(:+)
+  end
+
+  def method_missing(method_name, args=[])
+    @query_hash[method_name]
   end
 end

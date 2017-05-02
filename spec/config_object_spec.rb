@@ -4,11 +4,9 @@ require_relative '../lib/config_object'
 require_relative '../lib/entry'
 
 describe ConfigObject do
-  it "throws an error for a bad filename" do
-  #  expect(load_config("bad_file_name.conf")).to raise_error(RuntimeError, "Filename is incorrect.")
-  end
-
   config = ConfigObject.new("./test_files/test_file_1.conf")
+  config_overrides = ConfigObject.new("./test_files/test_file_1.conf", [:production, "ubuntu"])
+
   it "returns a symbolized hash on a single method call" do
     ftp_call = config.ftp
     expect(ftp_call.class).to eq(Hash)
