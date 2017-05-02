@@ -4,8 +4,8 @@ require_relative '../lib/config_object'
 require_relative '../lib/entry'
 
 describe ConfigObject do
-  config = ConfigObject.new("./test_files/test_file_1.conf")
-  config_overrides = ConfigObject.new("./test_files/test_file_1.conf", [:production, "ubuntu"])
+  config = ConfigObject.new("./test_files/test_file.conf")
+  config_overrides = ConfigObject.new("./test_files/test_file.conf", [:production, "ubuntu"])
 
   it "returns a symbolized hash on a single method call" do
     ftp_call = config.ftp
@@ -31,7 +31,7 @@ describe ConfigObject do
   end
 
   it "handles the case with one override" do
-    http_call = config.http
+    http_call = config_overrides.http
     expect(http_call.path).to eq("/srv/var/tmp/")
   end
 
