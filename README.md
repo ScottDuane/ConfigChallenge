@@ -4,7 +4,7 @@ This is demo code for a coding challenge that asked me to write a function that 
 
 ## Instructions for Use
 
-To run the built-in tests, clone the repo, navigate to the root directory, and run `rspec`. If you prefer to see printed example output, run `ruby lib/test.rb` from the command line. You can also `require` the file `entry.rb` (keeping `config_hash.rb` and `config_object.rb` in the same folder as `entry.rb`).
+To run the built-in tests, clone the repo, navigate to the root directory, and run `rspec`. You can also `require` the file `entry.rb` (keeping `config_hash.rb`, `config_object.rb`, and `queryable_nil.rb` in the same folder as `entry.rb`).
 
 ## Design & Approach
 
@@ -32,5 +32,7 @@ There are a few loose ends that I didn't have time to shore up. With more time I
 
 - Test the functionality of `is_well_formed?` and `parse_file` in `entry.rb`.   
 - It seems dicey to build onto `Hash` in this way. To better localize our work, another option would be to build a subclass onto `Hash`, say `ConfigHash`. Originally, I went this direction, but since the instructions specifically ask the `CONFIG.ftp` return a `Hash` object, I thought it better to return an object that is strictly an instance of this class.
+- Seems dicier yet to build onto `NilClass`. Class inheritance is tricky here since `NilClass` is a singleton; with this one I just ran out of time.
 - An edge case occurs when one of the setting names is the same as an existing method name on the `Hash` class. In that case, that method will get called rather than hitting `method_missing`. That's definitely a problem, and one that we could potentially deal with by outlawing a list of setting names or overriding them on the `Hash` class with another metaprogramming technique.
 - Refactor a couple things -- `remove_whitespace` appears in both `entry.rb` and `config_object.rb`, which is doesn't need to. It could sit in a helper file somewhere.  
+- Find a cleaner way to infer type in Ruby. Right now, I do it with `eval_with_type`, `eval_as_bool`, `eval_as_num`, and `eval_as_string`.

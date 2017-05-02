@@ -25,12 +25,19 @@ def is_well_formed?(lines)
     next if line_without_comments.nil? || line_without_comments.length == 0
 
     group_header_match = /\[[\w\_\-]+\]/ =~ line_without_comments ? true : false
-    setting_val_match = /[\w\d\/\_\:\.\,\*\@\-]+\s?=\s?[\w\d\/\_\:\`\"\.\,\*\^\@\-]+/ =~ line_without_comments ? true : false
-    setting_val_override_match = /[\w\d\/\_\:\.\,\*\@\-]+\<\w+\>\s?=\s?[\w\d\/\_\:\`\"\.\,\*\^\@\-]+/ =~ line_without_comments ? true : false
+    next if group_header_match
 
-    next if (group_header_match || setting_val_match) || setting_val_override_match
+    setting_val_pair = line_without_comments.split("=")
+    return false unless setting_val_pair.length == 2
 
-    return false
+    setting_match = /[\w\d\/\_\:\.\,\*\@\-]+\s?/ =~ setting_val_pair[0]
+    setting_override_match = /[\w\d\/\_\:\.\,\*\@\-]+\<\w+\>\s?/ =~ setting_val_pair[0]
+    return false unless setting_match || setting_override_match
+
+    str_val = remove_whitespace(setting_val_pair[1])
+    string_val_match =  str_val[0] == '"' && str_val[-1] == '"'
+    other_val_match = /[\w\d\/\_\:\.\,\*\^\@\-]+/ =~ str_val ? true : false
+    return false unless string_val_match || other_val_match
   end
 
   true
@@ -52,11 +59,11 @@ end
 def load_config(filename, overrides=[])
   file_lines = parse_file(filename)
   if file_lines.nil?
-    raise RuntimeError("Filename is incorrect.")
+    raise "Filename is incorrect."
   else
     well_formed = is_well_formed?(file_lines)
     if !well_formed
-      raise RuntimeError("File is malformed.")
+      raise "File is malformed."
     else
       return ConfigObject.new(filename, overrides)
     end

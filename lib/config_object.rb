@@ -1,4 +1,5 @@
 require_relative 'config_hash'
+require_relative 'queryable_nil'
 
 class ConfigObject
   def initialize(filepath, overrides=[])
@@ -55,8 +56,9 @@ class ConfigObject
     else
       setting_value_pair = line.split("=")
       setting = remove_whitespace(setting_value_pair[0])
-      value = eval_with_type(remove_whitespace(setting_value_pair[1]))
       setting_with_overrides = setting.split("<")
+      value = eval_with_type(remove_whitespace(setting_value_pair[1]))
+
       if setting_with_overrides.length == 1
         return ["setting_val", setting, value]
       else
@@ -68,13 +70,19 @@ class ConfigObject
   end
 
   def eval_with_type(input)
-    return true if ["yes", "true", "1"].include?(input)
-    return false if ["no", "false", "0"].include?(input)
+    bool_attempt = eval_as_bool(input)
+    return bool_attempt unless bool_attempt.nil?
 
     num_attempt = eval_as_num(input)
     return num_attempt if num_attempt
 
     eval_as_string(input)
+  end
+
+  def eval_as_bool(input)
+    return true if ["yes", "true", "1"].include?(input)
+    return false if ["no", "false", "0"].include?(input)
+    nil
   end
 
   # do this with regex? nah, still gotta do the period_count
