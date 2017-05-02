@@ -12,7 +12,7 @@ class ConfigObject
     lines = []
     File.open(@filepath, 'r') do |file|
       while new_line = file.gets
-        lines << new_line[0..-2]
+        lines << new_line
       end
     end
 
@@ -22,96 +22,107 @@ class ConfigObject
   def parse_text(lines)
     curr_group = ""
     lines.each do |line|
-      next if line.length == 0
-      # note: this makes the assumption that nothing kooky happens if there are two or more ; in a line
-      # note to self: this is pretty messy.  refactor before turning in
-      line_without_comments = line.split(";").first
-      line_chars = line_without_comments.chars
-      while line_chars[0] == " " || line_chars[0] == "\n"
-        line_chars.shift
-      end
-      line_without_comments = line_chars.reduce(:+)
+      line_without_comments = line.length == 0 ? nil : remove_whitespace(line.split(";").first)
       next if line_without_comments.nil?
 
       parsed_line = parse_line(line_without_comments)
+
       case parsed_line[0]
         when "group" then
-          curr_group = parsed_line[1]
-          @query_hash[curr_group] = {}
+          curr_group = parsed_line[1].to_sym
+          @query_hash[curr_group] = Hash.new
         when "setting_val" then
-          setting = parsed_line[1]
+          setting = parsed_line[1].to_sym
           val = parsed_line[2]
-          @query_hash[curr_group][setting] = {}
-          @query_hash[curr_group][setting][""] = val
+          @query_hash[curr_group][setting] = val
         when "setting_val_override" then
-          setting = parsed_line[1]
+          setting = parsed_line[1].to_sym
           override = parsed_line[2]
           val = parsed_line[3]
-          @query_hash[curr_group][setting][override] = val
+          if @overrides.include?(override) || @overrides.include?(override.to_sym)
+            @query_hash[curr_group][setting] = val
+          end
        end
     end
   end
 
   # takes in a line after white space has been ignored
   def parse_line(line)
-    # ignore empty lines
     if line.length == 0
       return nil
-    # treat these as group headers
     elsif line[0] == "["
       group_name = line[1..-2]
       return ["group", group_name]
-    # only look at the piece of the line that comes before the comment
-    # does it make sense to do the splitting before passing line to parse_line? probably
-    # EDIT: split over ; before calling parse_line, also get rid of whitespace
     else
       setting_value_pair = line.split("=")
-      setting = setting_value_pair[0]
-      value = setting_value_pair[1]
-
-      setting_chars = setting.chars
-      while setting_chars.last == " "
-        setting_chars.pop
-      end
-      setting = setting_chars.reduce(:+)
-
-      value_chars = value.chars
-      while value_chars.first == " "
-        value_chars.shift
-      end
-      value = value_chars.reduce(:+)
-
+      setting = remove_whitespace(setting_value_pair[0])
+      value = eval_with_type(remove_whitespace(setting_value_pair[1]))
       # error check to make sure that this parses correctly beforehand -- e.g., has a < and a >
       setting_with_overrides = setting.split("<")
       if setting_with_overrides.length == 1
         return ["setting_val", setting, value]
       else
         setting = setting_with_overrides[0]
-        override = setting_with_overrides[1]
-        override = override[0..-2]
+        override = setting_with_overrides[1][0..-2]
         return ["setting_val_override", setting, override, value]
       end
     end
   end
 
   def method_missing(method_name, args=[])
-    # this will create a new ConfigHash from the existing @query_hash and the args passed in
-    data = @query_hash[method_name.to_s]
-    nested_hash = Hash.new
-
-    # downside: time complexity.  can we build any of this as we go?  what depends on the method call/args itself?
-    data.each do |key, val|
-      key = key.to_sym
-      nested_hash[key] = val[""]
-
-      args.each do |override|
-        if data[key][override]
-          nested_hash[key] = val[override]
-        end
-      end
-    end
-
-    nested_hash
+    @query_hash[method_name]
   end
 
+  def eval_with_type(input)
+    return true if ["yes", "true", "1"].include?(input)
+    return false if ["no", "false", "0"].include?(input)
+
+    num_attempt = eval_as_num(input)
+    return num_attempt if num_attempt
+
+    eval_as_string(input)
+  end
+
+  # do this with regex? 
+  def eval_as_num(input)
+    period_count = 0
+    digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]
+
+    input.chars.each do |char|
+      period_count += 1 if char == "."
+      return false unless digits.include?(char)
+    end
+
+    case period_count
+      when 0
+        input.to_i
+      when 1
+        input.to_f
+      else
+        false
+    end
+  end
+
+  def eval_as_string(input)
+    if input[0] == '"'
+      input[1..-2]
+    else
+      comma_separated = input.split(",")
+      comma_separated.length > 1 ? comma_separated : input
+    end
+  end
+
+  def remove_whitespace(line)
+    line_chars = line.chars
+
+    while line_chars.first == " " || line_chars.first == "\n"
+      line_chars.shift
+    end
+
+    while line_chars.last == " " || line_chars.last == "\n"
+      line_chars.pop
+    end
+
+    line_chars.reduce(:+)
+  end
 end
