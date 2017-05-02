@@ -1,6 +1,6 @@
 # Config Challenge
 
-This is demo code for a coding challenge that asked me to write a function that takes in a `config` file, parses it using a particular set of standard `.INI` or `.conf` file rules, and return an object that can be queried thereafter.
+This is demo code for a coding challenge that asked me to write a function that takes in a `config` file, parses it using a particular set of standard `.INI` or `.conf` file rules, and returns an object that can be queried thereafter.
 
 ## Instructions for Use
 
@@ -12,7 +12,7 @@ This solution takes a 3-step approach:
 
 1. **Error handling**: make sure the file is present and well-formed. This happens in the `entry.rb` file, before the `ConfigObject` is created.
 2. **Creating the `ConfigObject`**: parse the text of the file upon initialization, creating a queryable hash as an instance variable as it goes.
-3. **Query with Metaprogramming**: use Ruby's `method_missing` feature to query the `ConfigObject` in constant time. Note that the `Hash` class gets reopened and its `method_missing` is redefined -- see the Loose Ends section for some notes on this.
+3. **Query with Metaprogramming**: use Ruby's `method_missing` feature to query the `ConfigObject` in constant time. Note that the `Hash` class and `NilClass` get reopened and their `method_missing`s are redefined -- see the <a href="https://github.com/ScottDuane/ConfigChallenge#loose-ends">Loose Ends</a> section for some notes on this.
 
 ## Time & Space Complexity
 
