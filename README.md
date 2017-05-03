@@ -33,6 +33,7 @@ There are a few loose ends that I didn't have time to shore up. With more time I
 - Write tests for `is_well_formed?` and `parse_file`.   
 - It seems dicey to build onto `Hash` in this way. To better localize our work, another option would be to build a subclass onto `Hash`, say `ConfigHash`. Originally, I went this direction, but since the instructions specifically ask the `CONFIG.ftp` return a `Hash` object, I thought it better to return an object that is strictly an instance of this class.
 - Seems dicier yet to build onto `NilClass`. Class inheritance is tricky here since `NilClass` is a singleton; with this one I just ran out of time.
+- One way to safely package these monkey-patches on `NilClass` and `Hash` would be to create a module and then include it in `ConfigObject`. I'd do this with more time.
 - An edge case occurs when one of the setting names is the same as an existing method name on the `Hash` class. In that case, that method will get called rather than hitting `method_missing`. That's definitely a problem, and one that we could potentially deal with by outlawing a list of setting names or overriding them on the `Hash` class with another metaprogramming technique.
 - Refactor a couple things -- `remove_whitespace` appears in both `entry.rb` and `config_object.rb`, which is doesn't need to. It could sit in a helper file somewhere.  
 - Find a cleaner way to infer type in Ruby. Right now, I do it with `eval_with_type`, `eval_as_bool`, `eval_as_num`, and `eval_as_string`.
