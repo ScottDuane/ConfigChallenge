@@ -3,6 +3,8 @@ require_relative '../lib/config_hash'
 require_relative '../lib/config_object'
 require_relative '../lib/entry'
 
+using Helper 
+
 describe ConfigObject do
   config = ConfigObject.new("./test_files/test_file.conf")
   config_overrides = ConfigObject.new("./test_files/test_file.conf", [:production, "ubuntu"])

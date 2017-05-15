@@ -1,11 +1,11 @@
-require_relative 'config_hash'
-require_relative 'queryable_nil'
+require_relative 'helper_module'
 
 class ConfigObject
+  using Helper
   def initialize(filepath, overrides=[])
     @filepath = filepath
     @overrides = overrides
-    @query_hash = {}
+    @query_hash = Hash.new
     create_hash
   end
 
@@ -114,19 +114,19 @@ class ConfigObject
     end
   end
 
-  def remove_whitespace(line)
-    line_chars = line.chars
-
-    while line_chars.first == " " || line_chars.first == "\n"
-      line_chars.shift
-    end
-
-    while line_chars.last == " " || line_chars.last == "\n"
-      line_chars.pop
-    end
-
-    line_chars.reduce(:+)
-  end
+  # def remove_whitespace(line)
+  #   line_chars = line.chars
+  #
+  #   while line_chars.first == " " || line_chars.first == "\n"
+  #     line_chars.shift
+  #   end
+  #
+  #   while line_chars.last == " " || line_chars.last == "\n"
+  #     line_chars.pop
+  #   end
+  #
+  #   line_chars.reduce(:+)
+  # end
 
   def method_missing(method_name, args=[])
     @query_hash[method_name]
